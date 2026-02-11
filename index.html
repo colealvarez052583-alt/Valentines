@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Be My Valentine? 💙</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #89CFF0, #FFB6C1);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: white;
+      text-align: center;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.15);
+      padding: 40px;
+      border-radius: 25px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.2);
+      backdrop-filter: blur(12px);
+      max-width: 500px;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 20px;
+    }
+
+    button {
+      border: none;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+      margin: 10px;
+    }
+
+    #yesBtn {
+      background: #ff69b4;
+      color: white;
+    }
+
+    #noBtn {
+      background: #4a90e2;
+      color: white;
+      position: relative;
+    }
+
+    button:hover {
+      transform: scale(1.08);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    input {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      margin-top: 15px;
+      width: 70%;
+      text-align: center;
+    }
+
+    .letterBox {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .letterBox p {
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    .cry {
+      font-size: 3rem;
+      animation: shake 0.8s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+      100% { transform: rotate(-5deg); }
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      animation: floatUp 4s linear infinite;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(100vh);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(-10vh);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 🎶 MUSIC FILES -->
+  <!-- Replace these with your MP3 files -->
+  <audio id="bgMusic" loop>
+    <source src="song1.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="letterMusic" loop>
+    <source src="song2.mp3" type="audio/mpeg">
+  </audio>
+
+  <audio id="clickSound">
+    <source src="click.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="card">
+
+    <!-- SCREEN 1 -->
+    <div id="screen1">
+      <h1>Will you be my Valentine? 💙💗</h1>
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
+
+    <!-- SCREEN 2 CRY -->
+    <div id="cryScreen" class="hidden">
+      <h1>WHY WOULD YOU SAY NO 😭</h1>
+      <div class="cry">💧💧💧</div>
+      <p>My heart is shattered...</p>
+      <button onclick="resetGame()">Try again...</button>
+    </div>
+
+    <!-- SCREEN 3 PASSWORD -->
+    <div id="passwordScreen" class="hidden">
+      <h1>YAYYYYY 🎉💖</h1>
+      <p>Okay okay… password first tho 😌</p>
+      <input type="password" id="passInput" placeholder="Enter password..." />
+      <br>
+      <button onclick="checkPassword()">Unlock 💌</button>
+      <p id="wrongPass"></p>
+    </div>
+
+    <!-- SCREEN 4 LETTER REWARD -->
+    <div id="letterScreen" class="hidden">
+      <h1>Welcome, My Valentine 💙💗</h1>
+      <p>These are for you…</p>
+
+      <div class="letterBox">
+        <p>
+          ✨ PASTE YOUR LETTERS HERE ✨ <br><br>
+
+          Dear Love, <br>
+          (Write your message here...) <br><br>
+
+          💗 Word of affirmation: You are my safest place. <br>
+          💙 Assurance: I will always choose you. <br>
+          🌸 Love note: You make life softer and brighter. <br><br>
+
+          Add as many letters as you want…
+        </p>
+      </div>
+
+      <button onclick="moreHearts()">More love 💕</button>
+    </div>
+
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+
+    const screen1 = document.getElementById("screen1");
+    const cryScreen = document.getElementById("cryScreen");
+    const passwordScreen = document.getElementById("passwordScreen");
+    const letterScreen = document.getElementById("letterScreen");
+
+    const bgMusic = document.getElementById("bgMusic");
+    const letterMusic = document.getElementById("letterMusic");
+    const clickSound = document.getElementById("clickSound");
+
+    // Start music after first click (browser rules)
+    document.body.addEventListener("click", () => {
+      bgMusic.play();
+    }, { once: true });
+
+    // YES button trolls first
+    let yesCount = 0;
+
+    yesBtn.addEventListener("click", () => {
+      clickSound.play();
+      yesCount++;
+
+      if (yesCount < 2) {
+        alert("Oops… that was actually a NO 😭 try again hehe");
+        showCry();
+      } else {
+        screen1.classList.add("hidden");
+        passwordScreen.classList.remove("hidden");
+        heartsRain();
+      }
+    });
+
+    // NO button runs away
+    noBtn.addEventListener("mouseover", () => {
+      let x = Math.random() * 250 - 100;
+      let y = Math.random() * 250 - 100;
+      noBtn.style.transform = `translate(${x}px, ${y}px)`;
+    });
+
+    // If somehow clicked NO
+    noBtn.addEventListener("click", () => {
+      showCry();
+    });
+
+    function showCry() {
+      screen1.classList.add("hidden");
+      cryScreen.classList.remove("hidden");
+    }
+
+    function resetGame() {
+      cryScreen.classList.add("hidden");
+      screen1.classList.remove("hidden");
+    }
+
+    // PASSWORD CHECK
+    function checkPassword() {
+      const input = document.getElementById("passInput").value;
+      const wrongPass = document.getElementById("wrongPass");
+
+      if (input === "0922") {
+        passwordScreen.classList.add("hidden");
+        letterScreen.classList.remove("hidden");
+
+        // Switch music for reading letters
+        bgMusic.pause();
+        letterMusic.play();
+
+        heartsRain();
+      } else {
+        wrongPass.innerText = "Wrong password 😭 try again!";
+      }
+    }
+
+    // HEART EFFECT
+    function heartsRain() {
+      for (let i = 0; i < 15; i++) {
+        createHeart();
+      }
+    }
+
+    function moreHearts() {
+      for (let i = 0; i < 25; i++) {
+        createHeart();
+      }
+    }
+
+    function createHeart() {
+      const heart = document.createElement("div");
+      heart.classList.add("heart");
+      heart.innerHTML = "💗";
+
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.animationDuration = (Math.random() * 2 + 3) + "s";
+
+      document.body.appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, 4000);
+    }
+  </script>
+
+</body>
+</html>
